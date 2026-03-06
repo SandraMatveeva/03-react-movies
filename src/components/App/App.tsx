@@ -9,7 +9,6 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
 import fetchMovies from "../../services/movieService";
 
-const notify = () => toast("Please enter your search query.");
 const notifyNoFilms = () => toast("No movies found for your request.");
 
 export default function App() {
@@ -17,30 +16,24 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [movie, setMovie] = useState<Movie>();
+  const [movie, setMovie] = useState<Movie | null>(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
-    setMovie(undefined);
+    setMovie(null);
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (query: string) => {
     setMovies([]);
-
-    const query = formData.get("query") as string;
-    if (query === "") {
-      notify();
-      return;
-    }
 
     try {
       setIsLoading(true);
       setIsError(false);
       const response = await fetchMovies(query);
 
-      setMovies(response.data.results);
-      if (response.data.results.length === 0) {
+      setMovies(response);
+      if (response.length === 0) {
         notifyNoFilms();
       }
     } catch {
